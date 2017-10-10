@@ -23,7 +23,7 @@ class Blockchain(object):
         :return: <dict> 新しいブロック
         """
 
-        blodk = {
+        block = {
             'index': len(self.chain) + 1,
             'timestamp': time(),
             'transactions': self.current_transactions,
@@ -132,7 +132,29 @@ def new_transaction():
 # メソッドはGETで/mineエンドポイントを作る
 @app.route('/mine', methods=['GET'])
 def mine():
-    return '新しいブロックを採掘します'
+    # 次のプルーフを見つけるためプルーフ・オブ・ワークアルゴリズムを使用する
+    last_block = blockchain.last_block
+    last_proof = last_block['proof']
+    proof = blockchain.proof_of_work(last_proof)
+
+    # プルーフを見つけたことに対する報酬を得る
+    # 送信者は、採掘者が新しいコインを採掘したことを表すために"0"とする
+    blockchain.new_transaction(
+        sender="0",
+        recipient=node_identifire,
+        amount=1,
+    )
+
+    # チェーンに新しいブロックを加えることで、新しいブロックを採掘する
+    block = blockchain.new_block(proof)
+
+    response = {
+        'message': '新しいブロックを採掘しました',
+        'index': block['index'],
+        'transactions': block['transactions'],
+        'proof': block['proof'],
+        'previous_hash': block['previous_hash'],
+    }
 
 
 # メソッドはGETで、フルのブロックチェーンをリターンする/chainエンドポイントを作る
