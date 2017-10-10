@@ -112,23 +112,6 @@ node_identifire = str(uuid4()).replace('-', '')
 blockchain = Blockchain()
 
 
-# メソッドはPOSTで/transactions/newエンドポイントを作る。メソッドはPOSTなのでデータを送信する
-@app.route('/transactions/new', methods=['POST'])
-def new_transaction():
-    values = request.get_json()
-
-    # POSTされたデータに必要なデータがあるかを確認
-    required = ['sender', 'recipient', 'amount']
-    if not all(k in values for k in required):
-        return 'Missing values', 400
-
-    # 新しいトランザクションを作る
-    index = blockchain.new_transaction(value['sender'], value['recipient'], value['amount'])
-
-    response = {'message': f'トランザクションはブロック {index} に追加されました'}
-    return jsonify(response), 201
-
-
 # メソッドはGETで/mineエンドポイントを作る
 @app.route('/mine', methods=['GET'])
 def mine():
@@ -156,6 +139,23 @@ def mine():
         'previous_hash': block['previous_hash'],
     }
     return jsonify(response), 200
+
+
+# メソッドはPOSTで/transactions/newエンドポイントを作る。メソッドはPOSTなのでデータを送信する
+@app.route('/transactions/new', methods=['POST'])
+def new_transaction():
+    values = request.get_json()
+
+    # POSTされたデータに必要なデータがあるかを確認
+    required = ['sender', 'recipient', 'amount']
+    if not all(k in values for k in required):
+        return 'Missing values', 400
+
+    # 新しいトランザクションを作る
+    index = blockchain.new_transaction(values['sender'], values['recipient'], values['amount'])
+
+    response = {'message': f'トランザクションはブロック {index} に追加されました'}
+    return jsonify(response), 201
 
 
 # メソッドはGETで、フルのブロックチェーンをリターンする/chainエンドポイントを作る
