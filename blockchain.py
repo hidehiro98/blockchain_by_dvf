@@ -6,7 +6,7 @@ from textwrap import dedent
 from time import time
 from uuid import uuid4
 
-from flask import flask, jsonify, request
+from flask import Flask, jsonify, request
 
 class Blockchain(object):
     def __init__(self):
@@ -28,7 +28,7 @@ class Blockchain(object):
             'timestamp': time(),
             'transactions': self.current_transactions,
             'proof': proof,
-            'previous_hash': previous_hash or self.hash(chain[-1]),
+            'previous_hash': previous_hash or self.hash(self.chain[-1]),
         }
 
         # 現在のトランザクションリストをリセット
@@ -96,7 +96,7 @@ class Blockchain(object):
         """
 
         guess = f'{last_proof}{proof}'.encode()
-        guess_hash = hashlib.sha256(guess).hexdigest
+        guess_hash = hashlib.sha256(guess).hexdigest()
 
         return guess_hash[:4] == "0000"
 
@@ -155,6 +155,7 @@ def mine():
         'proof': block['proof'],
         'previous_hash': block['previous_hash'],
     }
+    return jsonify(response), 200
 
 
 # メソッドはGETで、フルのブロックチェーンをリターンする/chainエンドポイントを作る
@@ -167,5 +168,5 @@ def full_chain():
     return jsonify(response), 200
 
 # port5000でサーバーを起動する
-if __name__ == __main__:
+if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
