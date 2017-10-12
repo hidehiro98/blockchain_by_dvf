@@ -243,6 +243,43 @@ def full_chain():
     }
     return jsonify(response), 200
 
+
+@app.route('/nodes/register', methods=['POST'])
+def register_node():
+    values = request.get_json()
+
+    nodes = values.get('nodes')
+    if node is None:
+        return "Error: 有効ではないノードのリストです", 400
+
+    for node in nodes:
+        blockchain.register_node(node)
+
+    response = {
+        'message': '新しいノードが追加されました',
+        'total_nodes': list(blockchain.nodes),
+    }
+    return jsonify(response), 201
+
+
+@app.route('/nodes/resolve', methods=['GET'])
+def consensus():
+    replaced = blockchain.resolve_conflicts()
+
+    if replaced:
+        response = {
+            'message': 'チェーンが置き換えられました',
+            'new_chain': blockchain.chain
+        }
+    else:
+        response = {
+            'message': 'チェーンが確認されました',
+            'chain': blockchain.chain
+        }
+
+    return jsonify(response), 200
+
+
 # port5000でサーバーを起動する
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
